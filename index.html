@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Club | Game Intelligence Showcase</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+        }
+        .title-font { font-family: 'Space Grotesk', sans-serif; }
+        .hidden-screen { display: none; }
+        canvas { background: #000; border-radius: 12px; width: 100%; max-width: 800px; display: block; margin: 0 auto; }
+        .btn-glow:hover { box-shadow: 0 0 20px rgba(56, 189, 248, 0.5); transform: translateY(-2px); }
+        .game-card { cursor: pointer; transition: 0.3s; }
+        .game-card:hover { background: rgba(255, 255, 255, 0.08); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-6">
+
+    <!-- Top Navigation / Presenter Shortcut -->
+    <nav class="fixed top-0 w-full p-6 flex justify-between items-center z-50">
+        <div class="text-xl font-bold tracking-tighter title-font text-sky-400">AI CLUB <span class="text-white">STEM</span></div>
+        <div class="flex gap-4">
+            <!-- HIDDEN SHORTCUT FOR PRESENTER -->
+            <button onclick="showScreen('hub-screen')" class="opacity-10 hover:opacity-100 transition-opacity text-xs bg-white/10 px-3 py-1 rounded">Admin Access</button>
+            <a href="https://harry-potter-wizarding-world.replit.app/" target="_blank" class="text-xs border border-white/20 px-3 py-1 rounded hover:bg-white/10 transition">External Project: Wizarding World</a>
+        </div>
+    </nav>
+
+    <!-- 1. START SCREEN -->
+    <div id="start-screen" class="text-center space-y-6 max-w-2xl">
+        <h1 class="text-6xl font-bold title-font leading-tight">Human vs. <span class="text-sky-400">Algorithm</span></h1>
+        <p class="text-slate-400 text-lg">Experience the intersection of game design and artificial intelligence. Take the assessment to find your match.</p>
+        <button onclick="showScreen('quiz-screen')" class="btn-glow bg-sky-500 text-white px-8 py-4 rounded-full font-bold text-lg transition-all">Begin Assessment</button>
+    </div>
+
+    <!-- 2. QUIZ SCREEN -->
+    <div id="quiz-screen" class="hidden-screen glass p-10 w-full max-w-xl">
+        <div id="quiz-content">
+            <p id="quiz-question" class="text-2xl font-medium mb-8">What is your preferred problem-solving style?</p>
+            <div class="space-y-4" id="quiz-options">
+                <!-- Options injected by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. HUB SCREEN (All Games) -->
+    <div id="hub-screen" class="hidden-screen w-full max-w-5xl">
+        <h2 class="text-3xl font-bold mb-8 title-font text-center">Select an <span class="text-sky-400">Experience</span></h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div onclick="launchGame('board')" class="glass p-6 game-card border-l-4 border-l-purple-500">
+                <h3 class="text-xl font-bold">The Strategist (AI Board)</h3>
+                <p class="text-slate-400 text-sm mt-2">Challenge a Minimax-based algorithm in a game of logic.</p>
+            </div>
+            <div onclick="launchGame('geometry')" class="glass p-6 game-card border-l-4 border-l-yellow-500">
+                <h3 class="text-xl font-bold">Vector Jump (Geo Dash Like)</h3>
+                <p class="text-slate-400 text-sm mt-2">Test your timing against procedural obstacle generation.</p>
+            </div>
+            <div onclick="launchGame('mario')" class="glass p-6 game-card border-l-4 border-l-red-500">
+                <h3 class="text-xl font-bold">Neural Platformer (Mario Like)</h3>
+                <p class="text-slate-400 text-sm mt-2">Physics-based movement in a simulated environment.</p>
+            </div>
+            <div onclick="launchGame('cyber')" class="glass p-6 game-card border-l-4 border-l-emerald-500">
+                <h3 class="text-xl font-bold">Cyber-Runner (Maze/Action)</h3>
+                <p class="text-slate-400 text-sm mt-2">Avoid the security AI in this high-speed maze chase.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. GAME VIEW SCREEN -->
+    <div id="game-screen" class="hidden-screen w-full flex flex-col items-center">
+        <div class="mb-4 flex gap-4">
+            <button onclick="showScreen('hub-screen')" class="text-sm text-slate-400 hover:text-white">← Back to Hub</button>
+            <span id="game-title" class="text-xl font-bold text-sky-400">Game Title</span>
+        </div>
+        <canvas id="gameCanvas" width="800" height="400"></canvas>
+        <p class="mt-4 text-slate-500 text-sm">Use [Space] or [Arrow Keys] to interact</p>
+    </div>
+
+    <script>
+        // --- QUIZ LOGIC ---
+        const questions = [
+            { q: "Choose your focus:", options: [
+                {t: "Deep Strategy", v: "board"}, {t: "Pure Reflexes", v: "geometry"}, 
+                {t: "Exploration", v: "mario"}, {t: "High Speed", v: "cyber"}
+            ]},
+            { q: "How do you view AI?", options: [
+                {t: "A chess opponent", v: "board"}, {t: "A procedural creator", v: "geometry"}, 
+                {t: "A world builder", v: "mario"}, {t: "A hunter", v: "cyber"}
+            ]}
+        ];
+        
+        let currentQ = 0;
+        let scores = { board: 0, geometry: 0, mario: 0, cyber: 0 };
+
+        function showScreen(id) {
+            document.querySelectorAll('body > div').forEach(div => {
+                if(div.id) div.classList.add('hidden-screen');
+            });
+            document.getElementById(id).classList.remove('hidden-screen');
+        }
+
+        function loadQuestion() {
+            const q = questions[currentQ];
+            document.getElementById('quiz-question').innerText = q.q;
+            const container = document.getElementById('quiz-options');
+            container.innerHTML = '';
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 glass hover:bg-white/10 transition rounded-xl border border-white/5";
+                btn.innerText = opt.t;
+                btn.onclick = () => {
+                    scores[opt.v]++;
+                    currentQ++;
+                    if(currentQ < questions.length) loadQuestion();
+                    else finalizeQuiz();
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function finalizeQuiz() {
+            const winner = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+            launchGame(winner);
+        }
+
+        // --- GAME HUB & ENGINES ---
+        let animationId;
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function launchGame(type) {
+            showScreen('game-screen');
+            document.getElementById('game-title').innerText = type.toUpperCase() + " SIMULATION";
+            cancelAnimationFrame(animationId);
+            
+            if(type === 'geometry') runGeometryDash();
+            if(type === 'mario') runMario();
+            if(type === 'board') runBoardGame();
+            if(type === 'cyber') runCyberRunner();
+        }
+
+        // --- GAME 1: GEOMETRY DASH LITE ---
+        function runGeometryDash() {
+            let player = { x: 50, y: 350, w: 30, h: 30, dy: 0, jump: -12, gravity: 0.6 };
+            let obstacles = [];
+            let frame = 0;
+
+            function update() {
+                frame++;
+                ctx.clearRect(0,0,800,400);
+                
+                // Physics
+                player.dy += player.gravity;
+                player.y += player.dy;
+                if(player.y > 350) { player.y = 350; player.dy = 0; }
+
+                // Draw Player
+                ctx.fillStyle = '#0ea5e9';
+                ctx.fillRect(player.x, player.y, player.w, player.h);
+
+                // Obstacles
+                if(frame % 100 === 0) obstacles.push({x: 800, w: 20, h: 40});
+                obstacles.forEach((o, i) => {
+                    o.x -= 5;
+                    ctx.fillStyle = '#ef4444';
+                    ctx.fillRect(o.x, 340, o.w, o.h);
+                    // Collision
+                    if(o.x < player.x + 30 && o.x + 20 > player.x && player.y > 310) {
+                        frame = 0; obstacles = []; // Reset
+                    }
+                });
+                
+                animationId = requestAnimationFrame(update);
+            }
+            window.onkeydown = (e) => { if(e.code === 'Space' && player.y === 350) player.dy = player.jump; };
+            update();
+        }
+
+        // --- GAME 2: MARIO LITE ---
+        function runMario() {
+            let p = { x: 100, y: 300, w: 30, h: 30, dx: 0, dy: 0 };
+            let platforms = [{x: 0, y: 380, w: 800, h: 20}, {x: 200, y: 280, w: 150, h: 20}, {x: 450, y: 200, w: 150, h: 20}];
+
+            function update() {
+                ctx.clearRect(0,0,800,400);
+                p.dy += 0.5; // Gravity
+                p.y += p.dy;
+                p.x += p.dx;
+
+                // Simple collision
+                platforms.forEach(plat => {
+                    ctx.fillStyle = '#334155';
+                    ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
+                    if(p.y + p.h > plat.y && p.y < plat.y + plat.h && p.x + p.w > plat.x && p.x < plat.x + plat.w) {
+                        p.y = plat.y - p.h; p.dy = 0;
+                    }
+                });
+
+                ctx.fillStyle = '#f87171';
+                ctx.fillRect(p.x, p.y, p.w, p.h);
+                animationId = requestAnimationFrame(update);
+            }
+            window.onkeydown = (e) => {
+                if(e.code === 'ArrowRight') p.dx = 5;
+                if(e.code === 'ArrowLeft') p.dx = -5;
+                if(e.code === 'Space') p.dy = -10;
+            };
+            window.onkeyup = (e) => { if(e.code.includes('Arrow')) p.dx = 0; };
+            update();
+        }
+
+        // --- GAME 3: AI BOARD GAME (Tic Tac Toe vs AI) ---
+        function runBoardGame() {
+            let board = ["","","","","","","","",""];
+            let isPlayerTurn = true;
+
+            function drawBoard() {
+                ctx.clearRect(0,0,800,400);
+                ctx.strokeStyle = "white";
+                ctx.lineWidth = 2;
+                // Grid
+                for(let i=1; i<3; i++) {
+                    ctx.beginPath(); ctx.moveTo(300 + i*60, 100); ctx.lineTo(300+i*60, 280); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(300, 100 + i*60); ctx.lineTo(480, 100+i*60); ctx.stroke();
+                }
+                board.forEach((cell, i) => {
+                    let x = 300 + (i % 3) * 60 + 30;
+                    let y = 100 + Math.floor(i / 3) * 60 + 30;
+                    ctx.fillStyle = "white"; ctx.textAlign = "center"; ctx.font = "30px Inter";
+                    ctx.fillText(cell, x, y + 10);
+                });
+            }
+
+            canvas.onclick = (e) => {
+                if(!isPlayerTurn) return;
+                const rect = canvas.getBoundingClientRect();
+                const mx = e.clientX - rect.left - 300;
+                const my = e.clientY - rect.top - 100;
+                const idx = Math.floor(mx/60) + Math.floor(my/60)*3;
+                if(board[idx] === "") {
+                    board[idx] = "X"; isPlayerTurn = false;
+                    setTimeout(aiMove, 500);
+                }
+                drawBoard();
+            };
+
+            function aiMove() {
+                let empty = board.map((v, i) => v === "" ? i : null).filter(v => v !== null);
+                if(empty.length > 0) board[empty[0]] = "O";
+                isPlayerTurn = true;
+                drawBoard();
+            }
+            drawBoard();
+        }
+
+        // --- GAME 4: CYBER RUNNER (Dodge AI) ---
+        function runCyberRunner() {
+            let player = {x: 400, y: 200, size: 20};
+            let bots = [{x: 100, y: 100}, {x: 700, y: 300}];
+
+            function update() {
+                ctx.clearRect(0,0,800,400);
+                ctx.fillStyle = '#10b981';
+                ctx.fillRect(player.x, player.y, player.size, player.size);
+
+                bots.forEach(bot => {
+                    // Simple "Chase AI"
+                    if(bot.x < player.x) bot.x += 1; else bot.x -= 1;
+                    if(bot.y < player.y) bot.y += 1; else bot.y -= 1;
+                    ctx.fillStyle = '#6366f1';
+                    ctx.beginPath(); ctx.arc(bot.x, bot.y, 10, 0, Math.PI*2); ctx.fill();
+                });
+                animationId = requestAnimationFrame(update);
+            }
+            window.onmousemove = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                player.x = e.clientX - rect.left - 10;
+                player.y = e.clientY - rect.top - 10;
+            };
+            update();
+        }
+
+        // Initialize
+        loadQuestion();
+    </script>
+</body>
+</html>
