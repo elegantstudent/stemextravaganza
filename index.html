@@ -3,298 +3,395 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Club | Game Intelligence Showcase</title>
+    <title>AI CLUB | NEURAL SHOWCASE</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@200;400;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
-            color: #f8fafc;
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
+        :root {
+            --neon-blue: #00f2ff;
+            --neon-purple: #7000ff;
+            --bg-dark: #050505;
         }
+
+        body {
+            background-color: var(--bg-dark);
+            color: #ffffff;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(112, 0, 255, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(0, 242, 255, 0.1) 0%, transparent 40%);
+        }
+
+        .title-font { font-family: 'Space Grotesk', sans-serif; }
+
         .glass {
             background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
         }
-        .title-font { font-family: 'Space Grotesk', sans-serif; }
-        .hidden-screen { display: none; }
-        canvas { background: #000; border-radius: 12px; width: 100%; max-width: 800px; display: block; margin: 0 auto; }
-        .btn-glow:hover { box-shadow: 0 0 20px rgba(56, 189, 248, 0.5); transform: translateY(-2px); }
-        .game-card { cursor: pointer; transition: 0.3s; }
-        .game-card:hover { background: rgba(255, 255, 255, 0.08); }
+
+        .neon-border-blue { border: 1px solid var(--neon-blue); box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); }
+        .neon-text-blue { color: var(--neon-blue); text-shadow: 0 0 10px rgba(0, 242, 255, 0.5); }
+
+        .btn-primary {
+            background: linear-gradient(90deg, var(--neon-purple), #4a00ff);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .btn-primary:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 0 30px rgba(112, 0, 255, 0.4);
+        }
+
+        .game-card {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .game-card:hover {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: var(--neon-blue);
+        }
+
+        .hidden-screen { display: none; opacity: 0; transform: translateY(20px); }
+        .visible-screen { display: flex; animation: fadeIn 0.6s forwards; }
+
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        canvas {
+            border-radius: 16px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            background: #000;
+            max-width: 100%;
+        }
+
+        /* Scanline Effect */
+        .scanline {
+            width: 100%; height: 2px;
+            background: rgba(0, 242, 255, 0.1);
+            position: absolute; top: 0;
+            animation: scan 4s linear infinite;
+        }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-6">
+<body class="min-h-screen flex flex-col items-center justify-between">
 
-    <!-- Top Navigation / Presenter Shortcut -->
-    <nav class="fixed top-0 w-full p-6 flex justify-between items-center z-50">
-        <div class="text-xl font-bold tracking-tighter title-font text-sky-400">AI CLUB <span class="text-white">STEM</span></div>
-        <div class="flex gap-4">
-            <!-- HIDDEN SHORTCUT FOR PRESENTER -->
-            <button onclick="showScreen('hub-screen')" class="opacity-10 hover:opacity-100 transition-opacity text-xs bg-white/10 px-3 py-1 rounded">Admin Access</button>
-            <a href="https://harry-potter-wizarding-world.replit.app/" target="_blank" class="text-xs border border-white/20 px-3 py-1 rounded hover:bg-white/10 transition">External Project: Wizarding World</a>
+    <!-- NAVIGATION -->
+    <nav class="w-full p-8 flex justify-between items-center z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-tr from-cyan-400 to-purple-600 rounded-lg rotate-12"></div>
+            <span class="title-font font-bold text-2xl tracking-widest">AI<span class="text-cyan-400">LAB</span></span>
+        </div>
+        <div class="flex gap-6 items-center">
+            <a href="https://harry-potter-wizarding-world.replit.app/" target="_blank" class="text-sm opacity-50 hover:opacity-100 transition">External Archive</a>
+            <div class="h-4 w-[1px] bg-white/20"></div>
+            <span class="text-[10px] tracking-[0.2em] opacity-40 uppercase">Showcase 2024.1</span>
         </div>
     </nav>
 
-    <!-- 1. START SCREEN -->
-    <div id="start-screen" class="text-center space-y-6 max-w-2xl">
-        <h1 class="text-6xl font-bold title-font leading-tight">Human vs. <span class="text-sky-400">Algorithm</span></h1>
-        <p class="text-slate-400 text-lg">Experience the intersection of game design and artificial intelligence. Take the assessment to find your match.</p>
-        <button onclick="showScreen('quiz-screen')" class="btn-glow bg-sky-500 text-white px-8 py-4 rounded-full font-bold text-lg transition-all">Begin Assessment</button>
-    </div>
+    <!-- MAIN CONTAINER -->
+    <main class="flex-1 w-full max-w-6xl flex items-center justify-center p-6">
+        
+        <!-- 1. INTRO SCREEN -->
+        <section id="screen-intro" class="visible-screen flex-col items-center text-center space-y-8">
+            <div class="space-y-4">
+                <h2 class="text-cyan-400 font-medium tracking-[0.4em] uppercase text-sm">Neural Matching Protocol</h2>
+                <h1 class="text-7xl font-bold title-font tracking-tighter leading-none">THE ARCHITECT <br> <span class="opacity-30">&</span> THE ENGINE</h1>
+                <p class="text-slate-400 max-w-xl mx-auto text-lg font-light leading-relaxed">
+                    A multi-agent demonstration of procedural generation and artificial logic. Take the assessment to synchronize with a project.
+                </p>
+            </div>
+            <button onclick="nav('screen-quiz')" class="btn-primary px-10 py-4 rounded-full font-bold text-sm tracking-widest uppercase mt-8">
+                Initialize Sync
+            </button>
+        </section>
 
-    <!-- 2. QUIZ SCREEN -->
-    <div id="quiz-screen" class="hidden-screen glass p-10 w-full max-w-xl">
-        <div id="quiz-content">
-            <p id="quiz-question" class="text-2xl font-medium mb-8">What is your preferred problem-solving style?</p>
-            <div class="space-y-4" id="quiz-options">
-                <!-- Options injected by JS -->
+        <!-- 2. QUIZ SCREEN -->
+        <section id="screen-quiz" class="hidden-screen flex-col w-full max-w-2xl">
+            <div class="glass p-12 rounded-3xl relative overflow-hidden">
+                <div class="scanline"></div>
+                <div id="quiz-header" class="mb-10">
+                    <div class="flex justify-between items-end mb-4">
+                        <span class="text-cyan-400 text-xs font-mono">STEP 0<span id="q-num">1</span> / 03</span>
+                        <div id="progress" class="h-1 bg-cyan-900 w-32 rounded-full overflow-hidden">
+                            <div id="progress-bar" class="h-full bg-cyan-400 w-1/3 transition-all duration-500"></div>
+                        </div>
+                    </div>
+                    <h3 id="q-text" class="text-3xl font-bold title-font">Analyzing core preference...</h3>
+                </div>
+                <div id="q-options" class="grid gap-4">
+                    <!-- Options injected here -->
+                </div>
             </div>
-        </div>
-    </div>
+        </section>
 
-    <!-- 3. HUB SCREEN (All Games) -->
-    <div id="hub-screen" class="hidden-screen w-full max-w-5xl">
-        <h2 class="text-3xl font-bold mb-8 title-font text-center">Select an <span class="text-sky-400">Experience</span></h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div onclick="launchGame('board')" class="glass p-6 game-card border-l-4 border-l-purple-500">
-                <h3 class="text-xl font-bold">The Strategist (AI Board)</h3>
-                <p class="text-slate-400 text-sm mt-2">Challenge a Minimax-based algorithm in a game of logic.</p>
+        <!-- 3. HUB SCREEN (GRID) -->
+        <section id="screen-hub" class="hidden-screen flex-col w-full">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold title-font">Project <span class="text-cyan-400">Library</span></h2>
+                <p class="text-slate-500 mt-2">Select a simulation to begin execution.</p>
             </div>
-            <div onclick="launchGame('geometry')" class="glass p-6 game-card border-l-4 border-l-yellow-500">
-                <h3 class="text-xl font-bold">Vector Jump (Geo Dash Like)</h3>
-                <p class="text-slate-400 text-sm mt-2">Test your timing against procedural obstacle generation.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Connect 4 / Board -->
+                <div onclick="launch('board')" class="game-card glass p-8 rounded-2xl cursor-pointer">
+                    <div class="w-12 h-12 rounded-full bg-cyan-500/20 mb-6 flex items-center justify-center text-cyan-400">01</div>
+                    <h4 class="text-xl font-bold mb-2">NEURAL GRID</h4>
+                    <p class="text-slate-500 text-sm">Adversarial Minimax logic engine.</p>
+                </div>
+                <!-- Geometry Dash -->
+                <div onclick="launch('geo')" class="game-card glass p-8 rounded-2xl cursor-pointer">
+                    <div class="w-12 h-12 rounded-full bg-purple-500/20 mb-6 flex items-center justify-center text-purple-400">02</div>
+                    <h4 class="text-xl font-bold mb-2">VECTOR RUN</h4>
+                    <p class="text-slate-500 text-sm">Procedural obstacle synchronization.</p>
+                </div>
+                <!-- Mario -->
+                <div onclick="launch('mario')" class="game-card glass p-8 rounded-2xl cursor-pointer">
+                    <div class="w-12 h-12 rounded-full bg-orange-500/20 mb-6 flex items-center justify-center text-orange-400">03</div>
+                    <h4 class="text-xl font-bold mb-2">PULSE JUMP</h4>
+                    <p class="text-slate-500 text-sm">Physics-based kinetic platforming.</p>
+                </div>
+                <!-- Cyber Dodge -->
+                <div onclick="launch('dodge')" class="game-card glass p-8 rounded-2xl cursor-pointer">
+                    <div class="w-12 h-12 rounded-full bg-emerald-500/20 mb-6 flex items-center justify-center text-emerald-400">04</div>
+                    <h4 class="text-xl font-bold mb-2">AERO DODGE</h4>
+                    <p class="text-slate-500 text-sm">Reactive swarm avoidance AI.</p>
+                </div>
             </div>
-            <div onclick="launchGame('mario')" class="glass p-6 game-card border-l-4 border-l-red-500">
-                <h3 class="text-xl font-bold">Neural Platformer (Mario Like)</h3>
-                <p class="text-slate-400 text-sm mt-2">Physics-based movement in a simulated environment.</p>
-            </div>
-            <div onclick="launchGame('cyber')" class="glass p-6 game-card border-l-4 border-l-emerald-500">
-                <h3 class="text-xl font-bold">Cyber-Runner (Maze/Action)</h3>
-                <p class="text-slate-400 text-sm mt-2">Avoid the security AI in this high-speed maze chase.</p>
-            </div>
-        </div>
-    </div>
+        </section>
 
-    <!-- 4. GAME VIEW SCREEN -->
-    <div id="game-screen" class="hidden-screen w-full flex flex-col items-center">
-        <div class="mb-4 flex gap-4">
-            <button onclick="showScreen('hub-screen')" class="text-sm text-slate-400 hover:text-white">← Back to Hub</button>
-            <span id="game-title" class="text-xl font-bold text-sky-400">Game Title</span>
-        </div>
-        <canvas id="gameCanvas" width="800" height="400"></canvas>
-        <p class="mt-4 text-slate-500 text-sm">Use [Space] or [Arrow Keys] to interact</p>
-    </div>
+        <!-- 4. GAME VIEW -->
+        <section id="screen-game" class="hidden-screen flex-col w-full items-center">
+            <div class="w-full flex justify-between items-center mb-6 max-w-4xl">
+                <button onclick="nav('screen-hub')" class="text-xs uppercase tracking-widest opacity-50 hover:opacity-100 transition">← Terminate Session</button>
+                <div id="game-label" class="neon-text-blue font-bold tracking-tighter uppercase">Simulation Active</div>
+            </div>
+            <canvas id="stage" width="900" height="450"></canvas>
+            <div class="mt-8 flex gap-12 text-[10px] uppercase tracking-[0.2em] text-slate-500">
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-500"></span> CPU: OPTIMAL</div>
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-cyan-500"></span> FPS: 60</div>
+                <div>Controls: [SPACE / ARROWS / MOUSE]</div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER / PRESENTER BYPASS -->
+    <footer class="w-full p-8 flex justify-between items-center opacity-30 text-[10px] tracking-widest uppercase">
+        <div>© AI CLUB STEM SHOWCASE</div>
+        <button onclick="nav('screen-hub')" class="hover:text-cyan-400 transition">Override System Access</button>
+    </footer>
 
     <script>
-        // --- QUIZ LOGIC ---
-        const questions = [
-            { q: "Choose your focus:", options: [
-                {t: "Deep Strategy", v: "board"}, {t: "Pure Reflexes", v: "geometry"}, 
-                {t: "Exploration", v: "mario"}, {t: "High Speed", v: "cyber"}
-            ]},
-            { q: "How do you view AI?", options: [
-                {t: "A chess opponent", v: "board"}, {t: "A procedural creator", v: "geometry"}, 
-                {t: "A world builder", v: "mario"}, {t: "A hunter", v: "cyber"}
-            ]}
+        // --- UI NAVIGATION ---
+        function nav(id) {
+            document.querySelectorAll('section').forEach(s => {
+                s.classList.remove('visible-screen');
+                s.classList.add('hidden-screen');
+            });
+            const target = document.getElementById(id);
+            target.classList.remove('hidden-screen');
+            target.classList.add('visible-screen');
+            if(id === 'screen-quiz') startQuiz();
+            cancelAnimationFrame(gameLoop);
+        }
+
+        // --- QUIZ DATA ---
+        const quizData = [
+            { q: "Choose your primary directive:", options: [{t:"Pure Logic", v:"board"}, {t:"High Kinematics", v:"geo"}, {t:"Environmental Mastery", v:"mario"}, {t:"Agent Evasion", v:"dodge"}]},
+            { q: "Preferred AI complexity?", options: [{t:"Decision Trees", v:"board"}, {t:"Procedural Spawning", v:"geo"}, {t:"Physics Simulation", v:"mario"}, {t:"Swarm Intelligence", v:"dodge"}]},
+            { q: "How do you handle pressure?", options: [{t:"Calculated Moves", v:"board"}, {t:"Rhythmic Response", v:"geo"}, {t:"Spatial Awareness", v:"mario"}, {t:"Total Agility", v:"dodge"}]}
         ];
         
-        let currentQ = 0;
-        let scores = { board: 0, geometry: 0, mario: 0, cyber: 0 };
+        let qIdx = 0;
+        let scores = { board:0, geo:0, mario:0, dodge:0 };
 
-        function showScreen(id) {
-            document.querySelectorAll('body > div').forEach(div => {
-                if(div.id) div.classList.add('hidden-screen');
-            });
-            document.getElementById(id).classList.remove('hidden-screen');
+        function startQuiz() {
+            qIdx = 0; scores = { board:0, geo:0, mario:0, dodge:0 };
+            showQuestion();
         }
 
-        function loadQuestion() {
-            const q = questions[currentQ];
-            document.getElementById('quiz-question').innerText = q.q;
-            const container = document.getElementById('quiz-options');
-            container.innerHTML = '';
-            q.options.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = "w-full text-left p-4 glass hover:bg-white/10 transition rounded-xl border border-white/5";
-                btn.innerText = opt.t;
-                btn.onclick = () => {
-                    scores[opt.v]++;
-                    currentQ++;
-                    if(currentQ < questions.length) loadQuestion();
-                    else finalizeQuiz();
-                };
-                container.appendChild(btn);
-            });
-        }
-
-        function finalizeQuiz() {
-            const winner = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
-            launchGame(winner);
-        }
-
-        // --- GAME HUB & ENGINES ---
-        let animationId;
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-
-        function launchGame(type) {
-            showScreen('game-screen');
-            document.getElementById('game-title').innerText = type.toUpperCase() + " SIMULATION";
-            cancelAnimationFrame(animationId);
+        function showQuestion() {
+            const data = quizData[qIdx];
+            document.getElementById('q-num').innerText = qIdx + 1;
+            document.getElementById('q-text').innerText = data.q;
+            document.getElementById('progress-bar').style.width = ((qIdx + 1) / 3 * 100) + "%";
             
-            if(type === 'geometry') runGeometryDash();
-            if(type === 'mario') runMario();
-            if(type === 'board') runBoardGame();
-            if(type === 'cyber') runCyberRunner();
+            const container = document.getElementById('q-options');
+            container.innerHTML = '';
+            data.options.forEach(opt => {
+                const b = document.createElement('button');
+                b.className = "w-full text-left p-5 glass rounded-xl hover:border-cyan-400/50 transition-all duration-300 flex justify-between group";
+                b.innerHTML = `<span>${opt.t}</span> <span class="opacity-0 group-hover:opacity-100 text-cyan-400">→</span>`;
+                b.onclick = () => {
+                    scores[opt.v]++;
+                    qIdx++;
+                    if(qIdx < quizData.length) showQuestion();
+                    else {
+                        const winner = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+                        launch(winner);
+                    }
+                };
+                container.appendChild(b);
+            });
         }
 
-        // --- GAME 1: GEOMETRY DASH LITE ---
-        function runGeometryDash() {
-            let player = { x: 50, y: 350, w: 30, h: 30, dy: 0, jump: -12, gravity: 0.6 };
-            let obstacles = [];
-            let frame = 0;
+        // --- GAME ENGINE ---
+        const canvas = document.getElementById('stage');
+        const ctx = canvas.getContext('2d');
+        let gameLoop;
+        let state = {};
 
-            function update() {
-                frame++;
-                ctx.clearRect(0,0,800,400);
+        function launch(type) {
+            nav('screen-game');
+            document.getElementById('game-label').innerText = "Simulating: " + type;
+            
+            if(type === 'geo') initGeo();
+            if(type === 'mario') initMario();
+            if(type === 'board') initBoard();
+            if(type === 'dodge') initDodge();
+        }
+
+        // --- GAME: VECTOR RUN (Geo Dash) ---
+        function initGeo() {
+            state = { pY:350, pDy:0, obstacles:[], frame:0, speed: 7, particles: [] };
+            function loop() {
+                ctx.fillStyle = '#050505'; ctx.fillRect(0,0,900,450);
                 
-                // Physics
-                player.dy += player.gravity;
-                player.y += player.dy;
-                if(player.y > 350) { player.y = 350; player.dy = 0; }
+                // Floor
+                ctx.strokeStyle = '#1e293b'; ctx.beginPath(); ctx.moveTo(0,380); ctx.lineTo(900,380); ctx.stroke();
 
-                // Draw Player
-                ctx.fillStyle = '#0ea5e9';
-                ctx.fillRect(player.x, player.y, player.w, player.h);
+                state.pDy += 0.8; state.pY += state.pDy;
+                if(state.pY > 350) { state.pY = 350; state.pDy = 0; }
 
-                // Obstacles
-                if(frame % 100 === 0) obstacles.push({x: 800, w: 20, h: 40});
-                obstacles.forEach((o, i) => {
-                    o.x -= 5;
-                    ctx.fillStyle = '#ef4444';
-                    ctx.fillRect(o.x, 340, o.w, o.h);
-                    // Collision
-                    if(o.x < player.x + 30 && o.x + 20 > player.x && player.y > 310) {
-                        frame = 0; obstacles = []; // Reset
-                    }
+                // Trail Particles
+                if(Math.random() > 0.5) state.particles.push({x:100, y:state.pY+15, r: Math.random()*5, life:1});
+                state.particles.forEach((p,i) => {
+                    p.x -= state.speed; p.life -= 0.02;
+                    ctx.fillStyle = `rgba(0, 242, 255, ${p.life})`;
+                    ctx.fillRect(p.x, p.y, p.r, p.r);
+                });
+
+                // Player
+                ctx.shadowBlur = 15; ctx.shadowColor = '#00f2ff';
+                ctx.fillStyle = '#00f2ff';
+                ctx.fillRect(100, state.pY, 30, 30);
+                ctx.shadowBlur = 0;
+
+                // Spawning
+                state.frame++;
+                if(state.frame % 80 === 0) state.obstacles.push({x: 900, w: 30, h: 40});
+
+                state.obstacles.forEach((o, i) => {
+                    o.x -= state.speed;
+                    ctx.fillStyle = '#ff0055';
+                    ctx.fillRect(o.x, 380 - o.h, o.w, o.h);
+                    if(o.x < 130 && o.x > 70 && state.pY > (380 - o.h - 30)) initGeo(); // Death
                 });
                 
-                animationId = requestAnimationFrame(update);
+                gameLoop = requestAnimationFrame(loop);
             }
-            window.onkeydown = (e) => { if(e.code === 'Space' && player.y === 350) player.dy = player.jump; };
-            update();
+            window.onkeydown = (e) => { if(e.code === 'Space' && state.pY === 350) state.pDy = -15; };
+            loop();
         }
 
-        // --- GAME 2: MARIO LITE ---
-        function runMario() {
-            let p = { x: 100, y: 300, w: 30, h: 30, dx: 0, dy: 0 };
-            let platforms = [{x: 0, y: 380, w: 800, h: 20}, {x: 200, y: 280, w: 150, h: 20}, {x: 450, y: 200, w: 150, h: 20}];
+        // --- GAME: PULSE JUMP (Mario) ---
+        function initMario() {
+            state = { x:100, y:200, dx:0, dy:0, platforms: [
+                {x:0, y:400, w:1200, h:50}, {x:300, y:300, w:200, h:20}, {x:600, y:220, w:200, h:20}
+            ]};
+            function loop() {
+                ctx.fillStyle = '#050505'; ctx.fillRect(0,0,900,450);
+                state.dy += 0.8; state.y += state.dy; state.x += state.dx;
 
-            function update() {
-                ctx.clearRect(0,0,800,400);
-                p.dy += 0.5; // Gravity
-                p.y += p.dy;
-                p.x += p.dx;
-
-                // Simple collision
-                platforms.forEach(plat => {
-                    ctx.fillStyle = '#334155';
+                state.platforms.forEach(plat => {
+                    ctx.fillStyle = 'rgba(255,255,255,0.1)';
                     ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
-                    if(p.y + p.h > plat.y && p.y < plat.y + plat.h && p.x + p.w > plat.x && p.x < plat.x + plat.w) {
-                        p.y = plat.y - p.h; p.dy = 0;
+                    ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.strokeRect(plat.x, plat.y, plat.w, plat.h);
+                    
+                    if(state.y+30 > plat.y && state.y < plat.y+plat.h && state.x+30 > plat.x && state.x < plat.x+plat.w) {
+                        if(state.dy > 0) { state.y = plat.y - 30; state.dy = 0; }
                     }
                 });
 
-                ctx.fillStyle = '#f87171';
-                ctx.fillRect(p.x, p.y, p.w, p.h);
-                animationId = requestAnimationFrame(update);
+                ctx.fillStyle = '#7000ff'; ctx.shadowBlur = 20; ctx.shadowColor = '#7000ff';
+                ctx.fillRect(state.x, state.y, 30, 30); ctx.shadowBlur = 0;
+                
+                gameLoop = requestAnimationFrame(loop);
             }
             window.onkeydown = (e) => {
-                if(e.code === 'ArrowRight') p.dx = 5;
-                if(e.code === 'ArrowLeft') p.dx = -5;
-                if(e.code === 'Space') p.dy = -10;
+                if(e.code === 'ArrowRight') state.dx = 6;
+                if(e.code === 'ArrowLeft') state.dx = -6;
+                if(e.code === 'Space' && state.dy === 0) state.dy = -16;
             };
-            window.onkeyup = (e) => { if(e.code.includes('Arrow')) p.dx = 0; };
-            update();
+            window.onkeyup = () => state.dx = 0;
+            loop();
         }
 
-        // --- GAME 3: AI BOARD GAME (Tic Tac Toe vs AI) ---
-        function runBoardGame() {
-            let board = ["","","","","","","","",""];
-            let isPlayerTurn = true;
-
-            function drawBoard() {
-                ctx.clearRect(0,0,800,400);
-                ctx.strokeStyle = "white";
-                ctx.lineWidth = 2;
-                // Grid
+        // --- GAME: NEURAL GRID (AI Board) ---
+        function initBoard() {
+            state = { grid: Array(9).fill(null), turn: 'U' };
+            function draw() {
+                ctx.fillStyle = '#050505'; ctx.fillRect(0,0,900,450);
+                ctx.strokeStyle = 'rgba(255,255,255,0.1)';
                 for(let i=1; i<3; i++) {
-                    ctx.beginPath(); ctx.moveTo(300 + i*60, 100); ctx.lineTo(300+i*60, 280); ctx.stroke();
-                    ctx.beginPath(); ctx.moveTo(300, 100 + i*60); ctx.lineTo(480, 100+i*60); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(350+i*70, 120); ctx.lineTo(350+i*70, 330); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(350, 120+i*70); ctx.lineTo(560, 120+i*70); ctx.stroke();
                 }
-                board.forEach((cell, i) => {
-                    let x = 300 + (i % 3) * 60 + 30;
-                    let y = 100 + Math.floor(i / 3) * 60 + 30;
-                    ctx.fillStyle = "white"; ctx.textAlign = "center"; ctx.font = "30px Inter";
-                    ctx.fillText(cell, x, y + 10);
+                state.grid.forEach((cell, i) => {
+                    if(!cell) return;
+                    let x = 350 + (i%3)*70 + 35, y = 120 + Math.floor(i/3)*70 + 35;
+                    ctx.font = 'bold 30px Space Grotesk'; ctx.textAlign = 'center';
+                    ctx.fillStyle = cell === 'U' ? '#00f2ff' : '#ff0055';
+                    ctx.fillText(cell, x, y+10);
                 });
             }
-
             canvas.onclick = (e) => {
-                if(!isPlayerTurn) return;
                 const rect = canvas.getBoundingClientRect();
-                const mx = e.clientX - rect.left - 300;
-                const my = e.clientY - rect.top - 100;
-                const idx = Math.floor(mx/60) + Math.floor(my/60)*3;
-                if(board[idx] === "") {
-                    board[idx] = "X"; isPlayerTurn = false;
-                    setTimeout(aiMove, 500);
-                }
-                drawBoard();
+                const x = e.clientX - rect.left - 350, y = e.clientY - rect.top - 120;
+                const idx = Math.floor(x/70) + Math.floor(y/70)*3;
+                if(state.grid[idx] || state.turn === 'C') return;
+                state.grid[idx] = 'U'; state.turn = 'C'; draw();
+                setTimeout(() => { 
+                    let empty = state.grid.map((v,i)=>v===null?i:null).filter(v=>v!==null);
+                    if(empty.length) state.grid[empty[Math.floor(Math.random()*empty.length)]] = 'C';
+                    state.turn = 'U'; draw();
+                }, 600);
             };
-
-            function aiMove() {
-                let empty = board.map((v, i) => v === "" ? i : null).filter(v => v !== null);
-                if(empty.length > 0) board[empty[0]] = "O";
-                isPlayerTurn = true;
-                drawBoard();
-            }
-            drawBoard();
+            draw();
         }
 
-        // --- GAME 4: CYBER RUNNER (Dodge AI) ---
-        function runCyberRunner() {
-            let player = {x: 400, y: 200, size: 20};
-            let bots = [{x: 100, y: 100}, {x: 700, y: 300}];
-
-            function update() {
-                ctx.clearRect(0,0,800,400);
-                ctx.fillStyle = '#10b981';
-                ctx.fillRect(player.x, player.y, player.size, player.size);
-
-                bots.forEach(bot => {
-                    // Simple "Chase AI"
-                    if(bot.x < player.x) bot.x += 1; else bot.x -= 1;
-                    if(bot.y < player.y) bot.y += 1; else bot.y -= 1;
-                    ctx.fillStyle = '#6366f1';
-                    ctx.beginPath(); ctx.arc(bot.x, bot.y, 10, 0, Math.PI*2); ctx.fill();
+        // --- GAME: AERO DODGE (Swarm AI) ---
+        function initDodge() {
+            state = { px: 450, py: 225, bots: [], score: 0 };
+            for(let i=0; i<5; i++) state.bots.push({x: Math.random()*900, y: Math.random()*450, s: 2 + Math.random()*2});
+            
+            function loop() {
+                ctx.fillStyle = 'rgba(5,5,5,0.2)'; ctx.fillRect(0,0,900,450);
+                
+                // Player
+                ctx.fillStyle = '#00f2ff'; ctx.beginPath(); ctx.arc(state.px, state.py, 8, 0, Math.PI*2); ctx.fill();
+                
+                state.bots.forEach(b => {
+                    let angle = Math.atan2(state.py - b.y, state.px - b.x);
+                    b.x += Math.cos(angle) * b.s;
+                    b.y += Math.sin(angle) * b.s;
+                    ctx.fillStyle = '#ff0055'; ctx.beginPath(); ctx.arc(b.x, b.y, 5, 0, Math.PI*2); ctx.fill();
+                    
+                    if(Math.hypot(state.px-b.x, state.py-b.y) < 13) initDodge(); // Death
                 });
-                animationId = requestAnimationFrame(update);
+                
+                gameLoop = requestAnimationFrame(loop);
             }
-            window.onmousemove = (e) => {
+            canvas.onmousemove = (e) => {
                 const rect = canvas.getBoundingClientRect();
-                player.x = e.clientX - rect.left - 10;
-                player.y = e.clientY - rect.top - 10;
+                state.px = e.clientX - rect.left; state.py = e.clientY - rect.top;
             };
-            update();
+            loop();
         }
-
-        // Initialize
-        loadQuestion();
     </script>
 </body>
 </html>
