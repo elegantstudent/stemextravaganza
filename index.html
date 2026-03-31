@@ -3,196 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI CLUB | PROJECT ZENITH</title>
+    <title>AI CLUB | OMNI_INTERFACE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --neon: #00f2ff; --accent: #bc13fe; --bg: #050505; }
-        body {
-            background-color: var(--bg);
-            color: #fff;
-            font-family: 'Space Grotesk', sans-serif;
-            overflow: hidden;
-            height: 100vh;
-            background-image: radial-gradient(circle at 50% 50%, #111 0%, #050505 100%);
-        }
+        :root { --n: #00f2ff; --a: #bc13fe; --bg: #020202; }
+        body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; overflow: hidden; height: 100vh; }
         .mono { font-family: 'JetBrains Mono', monospace; }
-        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .neon-text { color: var(--neon); text-shadow: 0 0 15px rgba(0, 242, 255, 0.6); }
-        .neon-border { border: 1px solid var(--neon); box-shadow: 0 0 20px rgba(0, 242, 255, 0.15); }
+        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .neon-text { color: var(--n); text-shadow: 0 0 15px rgba(0, 242, 255, 0.5); }
+        .neon-border { border: 1px solid var(--n); box-shadow: 0 0 20px rgba(0, 242, 255, 0.1); }
         
-        /* Interactive Elements */
-        .btn-hex {
-            clip-path: polygon(10% 0, 90% 0, 100% 50%, 90% 100%, 10% 100%, 0% 50%);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        canvas { background: #000; border-radius: 4px; box-shadow: 0 0 40px rgba(0,0,0,0.5); }
+
+        /* Scenery */
+        .grid-bg {
+            background-image: linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            perspective: 500px;
         }
-        .btn-hex:hover { background: var(--neon); color: #000; transform: scale(1.05); }
-        
-        canvas { border-radius: 4px; max-width: 100%; height: auto; cursor: crosshair; }
 
-        /* Animations */
-        @keyframes scanline { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
-        .scanline { position: absolute; top: 0; left: 0; width: 100%; height: 10px; background: linear-gradient(to bottom, transparent, rgba(0, 242, 255, 0.05), transparent); animation: scanline 6s linear infinite; pointer-events: none; }
-        
-        .typewriter-cursor::after { content: '|'; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0; } }
+        .screen { display: none; opacity: 0; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; position: absolute; inset: 0; }
+        .screen.active { display: flex; animation: k-in 0.6s cubic-bezier(0.2, 1, 0.3, 1) forwards; }
+        @keyframes k-in { from { opacity: 0; transform: scale(1.05) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
-        .hidden-screen { display: none; opacity: 0; }
-        .active-screen { display: flex; animation: fadeIn 0.5s forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        .btn-core {
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.02);
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.7rem;
+            padding: 1rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-core:hover { border-color: var(--n); color: var(--n); background: rgba(0, 242, 255, 0.05); transform: translateY(-2px); }
     </style>
 </head>
-<body class="flex flex-col">
+<body class="grid-bg">
 
-    <div class="scanline"></div>
-
-    <!-- GLOBAL NAV -->
-    <nav class="p-8 flex justify-between items-center z-50">
-        <div class="flex items-center gap-6">
-            <div class="h-10 w-10 border-2 border-cyan-400 rotate-45 flex items-center justify-center">
-                <div class="h-6 w-6 bg-cyan-400/20 rotate-[-45deg]"></div>
-            </div>
-            <div>
-                <h1 class="text-xl font-bold tracking-[0.2em]">CORE_<span class="text-cyan-400">INTERFACE</span></h1>
-                <p class="text-[9px] mono opacity-40 uppercase tracking-widest">STEM_AI_CLUB // S.04</p>
+    <!-- GLOBAL HUD -->
+    <header class="fixed top-0 w-full p-8 flex justify-between items-center z-50 pointer-events-none">
+        <div class="pointer-events-auto flex items-center gap-4">
+            <div class="w-8 h-8 bg-cyan-400 rounded-sm rotate-45"></div>
+            <div class="mono">
+                <div class="text-sm font-bold tracking-tighter">AI_CLUB.SYS</div>
+                <div class="text-[9px] opacity-40 uppercase">Showcase_Edition_2024</div>
             </div>
         </div>
-        <div class="flex gap-8 items-center mono text-[10px] tracking-tighter uppercase">
-            <a href="https://harry-potter-wizarding-world.replit.app/" target="_blank" class="hover:text-cyan-400 transition border-b border-transparent hover:border-cyan-400">Wiz_Archive</a>
-            <div class="h-4 w-[1px] bg-white/20"></div>
-            <span id="clock" class="text-cyan-400">00:00:00</span>
+        <div class="pointer-events-auto flex gap-6 text-[10px] mono opacity-40 hover:opacity-100 transition">
+            <a href="https://harry-potter-wizarding-world.replit.app/" target="_blank">EXT_ARCHIVE</a>
+            <span id="timestamp">00:00:00</span>
         </div>
-    </nav>
+    </header>
 
-    <!-- CONTENT AREA -->
-    <main class="flex-1 flex items-center justify-center relative px-10">
+    <!-- 1. BOOT SCREEN -->
+    <section id="scr-boot" class="screen active">
+        <div class="max-w-xl w-full">
+            <div id="terminal" class="mono text-cyan-400 text-xs leading-relaxed mb-10"></div>
+            <h1 class="text-7xl font-bold tracking-tighter mb-8">SYSTEM <span class="opacity-20">SYNC</span></h1>
+            <button onclick="nav('scr-quiz')" class="btn-core">Initialize Diagnostic</button>
+        </div>
+    </section>
 
-        <!-- SCREEN: BOOT -->
-        <section id="scr-boot" class="active-screen flex-col items-center max-w-4xl">
-            <h2 id="boot-text" class="text-6xl md:text-8xl font-bold tracking-tighter typewriter-cursor mb-6"></h2>
-            <p id="boot-desc" class="mono text-xs opacity-0 uppercase tracking-[0.4em] mb-12">Neural matching protocol initializing...</p>
-            <button onclick="nav('scr-quiz')" class="btn-hex border border-cyan-400 px-12 py-4 mono text-xs tracking-widest hover:shadow-[0_0_30px_rgba(0,242,255,0.4)]">Initialize_Sync</button>
-        </section>
-
-        <!-- SCREEN: QUIZ -->
-        <section id="scr-quiz" class="hidden-screen flex-col w-full max-w-2xl glass p-12 rounded-sm border-l-2 border-l-cyan-400">
-            <div class="mb-12">
-                <div class="flex justify-between mono text-[10px] opacity-40 mb-4">
-                    <span>ASSESSMENT_MODAL</span>
-                    <span id="quiz-step">01 / 03</span>
-                </div>
-                <h3 id="quiz-q" class="text-4xl font-bold tracking-tight">Detecting cognitive bias...</h3>
+    <!-- 2. QUIZ SCREEN -->
+    <section id="scr-quiz" class="screen">
+        <div class="glass p-12 max-w-2xl w-full border-t-4 border-t-cyan-400">
+            <div class="flex justify-between mono text-[10px] mb-8 opacity-40">
+                <span>NEURAL_CALIBRATION</span>
+                <span id="q-idx">01 / 03</span>
             </div>
-            <div id="quiz-opts" class="grid grid-cols-1 gap-4"></div>
-        </section>
+            <h2 id="q-text" class="text-4xl font-bold mb-10 tracking-tight">Determining core heuristic...</h2>
+            <div id="q-options" class="grid gap-3"></div>
+        </div>
+    </section>
 
-        <!-- SCREEN: HUB -->
-        <section id="scr-hub" class="hidden-screen flex-col w-full max-w-6xl">
-            <div class="mb-10 flex justify-between items-end">
-                <div>
-                    <h2 class="text-4xl font-bold">PROJECT_<span class="text-cyan-400">DIRECTORY</span></h2>
-                    <p class="mono text-[10px] opacity-40 mt-2 uppercase">Authorized node access confirmed</p>
-                </div>
+    <!-- 3. HUB SCREEN -->
+    <section id="scr-hub" class="screen">
+        <h2 class="text-xs mono tracking-[1em] mb-12 opacity-30 uppercase">Authorized Core Modules</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-6xl px-10">
+            <div onclick="nav('scr-board-select')" class="glass p-10 hover:border-cyan-400 transition cursor-pointer group">
+                <div class="h-1 w-8 bg-cyan-400 mb-6 transition-all group-hover:w-full"></div>
+                <h3 class="text-xl font-bold">BOARD_LOGIC</h3>
+                <p class="text-xs opacity-40 mt-2 mono uppercase">Strategy Simulations</p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div onclick="openSubHub('board')" class="glass p-8 hover:bg-cyan-400/5 cursor-pointer transition group border-t-2 border-t-transparent hover:border-t-cyan-400">
-                    <div class="mono text-xs mb-6 opacity-30">01</div>
-                    <h4 class="text-xl font-bold group-hover:text-cyan-400 transition">BOARD_ALGO</h4>
-                    <p class="text-xs text-slate-500 mt-2">Tic-Tac-Toe / Chess / Connect4</p>
-                </div>
-                <div onclick="launch('geo')" class="glass p-8 hover:bg-purple-400/5 cursor-pointer transition group border-t-2 border-t-transparent hover:border-t-purple-400">
-                    <div class="mono text-xs mb-6 opacity-30">02</div>
-                    <h4 class="text-xl font-bold group-hover:text-purple-400 transition">VECTOR_DASH</h4>
-                    <p class="text-xs text-slate-500 mt-2">Procedural Rhythm Engine</p>
-                </div>
-                <div onclick="launch('mario')" class="glass p-8 hover:bg-orange-400/5 cursor-pointer transition group border-t-2 border-t-transparent hover:border-t-orange-400">
-                    <div class="mono text-xs mb-6 opacity-30">03</div>
-                    <h4 class="text-xl font-bold group-hover:text-orange-400 transition">KINETIC_CORE</h4>
-                    <p class="text-xs text-slate-500 mt-2">Physics platform sandbox</p>
-                </div>
-                <div onclick="window.open('https://wordgame.0x32.me/', '_blank')" class="glass p-8 hover:bg-emerald-400/5 cursor-pointer transition group border-t-2 border-t-transparent hover:border-t-emerald-400">
-                    <div class="mono text-xs mb-6 opacity-30">04</div>
-                    <h4 class="text-xl font-bold group-hover:text-emerald-400 transition">LEXICAL_PROC</h4>
-                    <p class="text-xs text-slate-500 mt-2">External Terminal Link →</p>
-                </div>
+            <div onclick="launch('geo')" class="glass p-10 hover:border-purple-400 transition cursor-pointer group">
+                <div class="h-1 w-8 bg-purple-400 mb-6 transition-all group-hover:w-full"></div>
+                <h3 class="text-xl font-bold">VECTOR_DASH</h3>
+                <p class="text-xs opacity-40 mt-2 mono uppercase">Kinetic Response</p>
             </div>
-        </section>
+            <div onclick="launch('mario')" class="glass p-10 hover:border-orange-400 transition cursor-pointer group">
+                <div class="h-1 w-8 bg-orange-400 mb-6 transition-all group-hover:w-full"></div>
+                <h3 class="text-xl font-bold">PULSE_RUN</h3>
+                <p class="text-xs opacity-40 mt-2 mono uppercase">Physics Integration</p>
+            </div>
+            <div onclick="window.open('https://wordgame.0x32.me/', '_blank')" class="glass p-10 hover:border-emerald-400 transition cursor-pointer group">
+                <div class="h-1 w-8 bg-emerald-400 mb-6 transition-all group-hover:w-full"></div>
+                <h3 class="text-xl font-bold">LEXICAL_AI</h3>
+                <p class="text-xs opacity-40 mt-2 mono uppercase">External Protocol ↗</p>
+            </div>
+        </div>
+    </section>
 
-        <!-- SCREEN: BOARD SUB-HUB -->
-        <section id="scr-subhub" class="hidden-screen flex-col items-center w-full max-w-4xl">
-            <h3 class="text-3xl font-bold mb-8 italic">Choose Strategy <span class="text-cyan-400">Logic</span></h3>
-            <div class="grid grid-cols-3 gap-6 w-full">
-                <button onclick="launch('ttt')" class="glass p-6 py-12 mono text-xs hover:bg-white/5 uppercase tracking-widest">Tic_Tac_Toe</button>
-                <button onclick="launch('chess')" class="glass p-6 py-12 mono text-xs hover:bg-white/5 uppercase tracking-widest">Chess_Visual</button>
-                <button onclick="launch('c4')" class="glass p-6 py-12 mono text-xs hover:bg-white/5 uppercase tracking-widest">Connect_4</button>
-            </div>
-            <button onclick="nav('scr-hub')" class="mt-12 mono text-[10px] opacity-40 hover:opacity-100 uppercase tracking-widest underline">Return to Directory</button>
-        </section>
+    <!-- 4. BOARD SELECT -->
+    <section id="scr-board-select" class="screen">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold tracking-tighter">SELECT <span class="text-cyan-400">ALGORITHM</span></h2>
+        </div>
+        <div class="grid grid-cols-3 gap-6 w-full max-w-4xl">
+            <button onclick="launch('ttt')" class="btn-core">Tic_Tac_Toe</button>
+            <button onclick="launch('c4')" class="btn-core">Connect_Four</button>
+            <button onclick="launch('chess')" class="btn-core">Chess_Analysis</button>
+        </div>
+        <button onclick="nav('scr-hub')" class="mt-12 mono text-[10px] opacity-40 hover:opacity-100 uppercase underline tracking-widest">Back to Library</button>
+    </section>
 
-        <!-- SCREEN: GAME VIEW -->
-        <section id="scr-game" class="hidden-screen flex-col items-center w-full">
-            <div class="w-full max-w-[900px] flex justify-between items-center mb-6 mono text-[10px] opacity-50 uppercase tracking-widest">
-                <button onclick="terminate()" class="hover:text-red-500 transition">Terminate_Process [ESC]</button>
-                <div id="game-label" class="text-cyan-400">System_Executing</div>
-            </div>
+    <!-- 5. GAME SCREEN -->
+    <section id="scr-game" class="screen">
+        <div class="w-full max-w-[900px] flex justify-between items-center mb-4 mono text-[10px]">
+            <button onclick="stopAll()" class="hover:text-red-500 transition tracking-widest">[×] KILL_PROCESS</button>
+            <div id="game-title" class="neon-text font-bold">SIMULATION_ACTIVE</div>
+        </div>
+        <div class="relative">
             <canvas id="stage" width="900" height="450" class="neon-border"></canvas>
-            <div id="game-instructions" class="mt-6 mono text-[10px] opacity-40">Controls: Space / Arrows / Mouse</div>
-        </section>
+            <!-- Overlay for Win/Loss -->
+            <div id="game-msg" class="absolute inset-0 bg-black/90 hidden flex-col items-center justify-center fade-in">
+                <h3 id="msg-text" class="text-5xl font-bold mb-8 italic">SYNC_LOST</h3>
+                <button onclick="restartActive()" class="btn-core">Re-Initialize</button>
+            </div>
+        </div>
+    </section>
 
-    </main>
-
-    <!-- FOOTER BYPASS -->
-    <footer class="p-8 flex justify-between items-center z-50">
-        <div class="mono text-[9px] opacity-20 uppercase tracking-widest">Latency: 2ms // Status: Online</div>
-        <button onclick="nav('scr-hub')" class="mono text-[9px] opacity-5 hover:opacity-100 transition">Admin_Override</button>
+    <footer class="fixed bottom-0 w-full p-8 flex justify-between pointer-events-none opacity-20">
+        <div class="text-[9px] mono">LATENCY: 0.002ms</div>
+        <button onclick="nav('scr-hub')" class="pointer-events-auto text-[9px] mono hover:opacity-100 uppercase underline">Override Access</button>
     </footer>
 
     <script>
-        // --- SYSTEM CORE ---
+        // --- CORE MANAGER ---
         let loop = null;
+        let activeKey = null;
         const canvas = document.getElementById('stage');
         const ctx = canvas.getContext('2d');
-        let state = {};
+        let currentLevel = "";
 
         function nav(id) {
-            document.querySelectorAll('main > section').forEach(s => {
-                s.classList.remove('active-screen');
-                s.classList.add('hidden-screen');
-            });
-            const target = document.getElementById(id);
-            target.classList.remove('hidden-screen');
-            target.classList.add('active-screen');
-            if(id === 'scr-quiz') startQuiz();
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            stopAll();
         }
 
-        function terminate() {
-            cancelAnimationFrame(loop);
+        function stopAll() {
+            if(loop) cancelAnimationFrame(loop);
             loop = null;
-            nav('scr-hub');
+            window.onkeydown = null;
+            window.onkeyup = null;
+            canvas.onclick = null;
+            canvas.onmousemove = null;
+            document.getElementById('game-msg').classList.add('hidden');
         }
 
-        function openSubHub() { nav('scr-subhub'); }
+        function restartActive() { launch(currentLevel); }
 
-        // --- TYPEWRITER ---
-        const type = async (text, el) => {
-            for(let i=0; i<=text.length; i++) {
-                el.innerText = text.slice(0, i);
-                await new Promise(r => setTimeout(r, 60));
+        function showResult(text) {
+            document.getElementById('msg-text').innerText = text;
+            document.getElementById('game-msg').classList.remove('hidden');
+            cancelAnimationFrame(loop);
+        }
+
+        // --- TERMINAL BOOT ---
+        const term = document.getElementById('terminal');
+        const lines = [
+            "> INITIALIZING OMNI_CORE v4.0.1...",
+            "> LOADING NEURAL NETWORK WEIGHTS...",
+            "> ESTABLISHING QUANTUM HANDSHAKE...",
+            "> SECURITY OVERRIDE: GRANTED.",
+            "> SYSTEM READY."
+        ];
+        let lineIdx = 0;
+        function typeTerm() {
+            if(lineIdx < lines.length) {
+                term.innerHTML += lines[lineIdx] + "<br>";
+                lineIdx++;
+                setTimeout(typeTerm, 400);
             }
-            document.getElementById('boot-desc').style.opacity = 1;
-        };
+        }
         window.onload = () => {
-            type("NEURAL_SYNC", document.getElementById('boot-text'));
+            typeTerm();
             setInterval(() => {
-                document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-GB');
+                document.getElementById('timestamp').innerText = new Date().toLocaleTimeString('en-GB');
             }, 1000);
         };
 
-        // --- QUIZ LOGIC ---
+        // --- QUIZ ---
         const quizData = [
-            { q: "Define primary input focus:", opts: [{t:"Recursive Logic", v:"board"}, {t:"Frame-Perfect Sync", v:"geo"}, {t:"Newtonian Physics", v:"mario"}, {t:"Lexical Analysis", v:"word"}]},
-            { q: "AI Interaction preference?", opts: [{t:"Adversarial Tree", v:"board"}, {t:"Procedural Spawner", v:"geo"}, {t:"Physics Sandbox", v:"mario"}, {t:"Natural Language", v:"word"}]},
-            { q: "Response urgency level?", opts: [{t:"Low (Turn-based)", v:"board"}, {t:"High (Reaction)", v:"geo"}, {t:"Medium (Platforming)", v:"mario"}, {t:"Static (Puzzles)", v:"word"}]}
+            { q: "PRIMARY DIRECTIVE?", opts: [{t:"STRATEGY", v:"board"}, {t:"REFLEX", v:"geo"}, {t:"EXPLORATION", v:"mario"}, {t:"LANGUAGE", v:"word"}] },
+            { q: "AI ARCHITECTURE?", opts: [{t:"MINIMAX", v:"board"}, {t:"PROCEDURAL", v:"geo"}, {t:"PHYSICS", v:"mario"}, {t:"NLP", v:"word"}] },
+            { q: "SYNC INTENSITY?", opts: [{t:"TURN-BASED", v:"board"}, {t:"HIGH-TEMPO", v:"geo"}, {t:"MOMENTUM", v:"mario"}, {t:"STATIC", v:"word"}] }
         ];
         let qIdx = 0, scores = {board:0, geo:0, mario:0, word:0};
 
@@ -202,33 +210,34 @@
         }
 
         function renderQ() {
-            const data = quizData[qIdx];
-            document.getElementById('quiz-q').innerText = data.q;
-            document.getElementById('quiz-step').innerText = `0${qIdx+1} / 03`;
-            const container = document.getElementById('quiz-opts');
+            const d = quizData[qIdx];
+            document.getElementById('q-text').innerText = d.q;
+            document.getElementById('q-idx').innerText = `0${qIdx+1} / 03`;
+            const container = document.getElementById('q-options');
             container.innerHTML = '';
-            data.opts.forEach(o => {
+            d.opts.forEach(o => {
                 const b = document.createElement('button');
-                b.className = "w-full text-left p-5 border border-white/5 hover:border-cyan-400 hover:bg-cyan-400/5 transition mono text-[11px] uppercase tracking-widest";
-                b.innerHTML = `<span class="opacity-30 mr-4">${Math.random().toString(16).slice(2,6)}</span> ${o.t}`;
+                b.className = "btn-core w-full text-left";
+                b.innerText = o.t;
                 b.onclick = () => {
                     scores[o.v]++;
                     if(++qIdx < 3) renderQ();
                     else {
                         const winner = Object.keys(scores).reduce((a,b)=>scores[a]>scores[b]?a:b);
                         if(winner === 'word') window.open('https://wordgame.0x32.me/', '_blank');
-                        else winner === 'board' ? openSubHub() : launch(winner);
+                        else winner === 'board' ? nav('scr-board-select') : launch(winner);
                     }
                 };
                 container.appendChild(b);
             });
         }
+        document.querySelector('[onclick="nav(\'scr-quiz\')"]').addEventListener('click', startQuiz);
 
-        // --- GAME ENGINES ---
+        // --- GAMES ---
         function launch(type) {
+            currentLevel = type;
             nav('scr-game');
-            if(loop) cancelAnimationFrame(loop);
-            document.getElementById('game-label').innerText = "Simulating_" + type.toUpperCase();
+            document.getElementById('game-title').innerText = "MODULE_" + type.toUpperCase();
             
             if(type === 'geo') startGeo();
             if(type === 'mario') startMario();
@@ -237,133 +246,151 @@
             if(type === 'chess') startChess();
         }
 
-        // 1. VECTOR DASH
+        // 1. VECTOR DASH (Geo Dash)
         function startGeo() {
-            let p = { y:350, dy:0 }, obs = [], f = 0;
+            let py = 350, pdy = 0, obs = [], frame = 0, score = 0;
             const run = () => {
-                ctx.fillStyle = '#050505'; ctx.fillRect(0,0,900,450);
-                ctx.strokeStyle = '#111'; ctx.strokeRect(0,380,900,1);
-                p.dy += 0.8; p.y += p.dy;
-                if(p.y > 350) { p.y = 350; p.dy = 0; }
-                ctx.fillStyle = '#00f2ff'; ctx.fillRect(100, p.y, 30, 30);
-                if(f++ % 80 === 0) obs.push({x:900});
+                ctx.fillStyle = '#000'; ctx.fillRect(0,0,900,450);
+                ctx.strokeStyle = '#222'; ctx.strokeRect(0,380,900,1);
+                
+                pdy += 0.8; py += pdy;
+                if(py > 350) { py = 350; pdy = 0; }
+                
+                ctx.fillStyle = '#00f2ff'; ctx.shadowBlur = 15; ctx.shadowColor = '#00f2ff';
+                ctx.fillRect(100, py, 30, 30); ctx.shadowBlur = 0;
+
+                if(frame++ % 70 === 0) obs.push({x:900});
                 obs.forEach((o,i) => {
-                    o.x -= 8; ctx.fillStyle = '#ff0055'; ctx.fillRect(o.x, 340, 30, 40);
-                    if(o.x < 130 && o.x > 70 && p.y > 310) startGeo();
+                    o.x -= 9;
+                    ctx.fillStyle = '#ff0055'; ctx.fillRect(o.x, 345, 30, 35);
+                    if(o.x < 130 && o.x > 70 && py > 315) showResult("SYNC LOST");
+                    if(o.x < 0) { obs.splice(i,1); score++; }
                 });
+                if(score > 20) showResult("SYSTEM STABILIZED");
                 loop = requestAnimationFrame(run);
             };
-            window.onkeydown = (e) => { if(e.code==='Space' && p.y==350) p.dy=-15; };
+            window.onkeydown = (e) => { if(e.code === 'Space' && py === 350) pdy = -14; };
             run();
         }
 
-        // 2. KINETIC CORE (Mario)
+        // 2. PULSE RUN (Mario)
         function startMario() {
-            let x=100, y=300, dx=0, dy=0, plats=[{x:0,y:400,w:900,h:50},{x:300,y:300,w:200,h:10},{x:600,y:200,w:150,h:10}];
+            let px = 100, py = 300, pdx = 0, pdy = 0, 
+                plats = [{x:0, y:400, w:900, h:50}, {x:300, y:300, w:200, h:15}, {x:600, y:210, w:150, h:15}, {x:100, y:150, w:100, h:15}];
             const run = () => {
-                ctx.fillStyle = '#050505'; ctx.fillRect(0,0,900,450);
-                dy += 0.7; y += dy; x += dx;
+                ctx.fillStyle = '#000'; ctx.fillRect(0,0,900,450);
+                pdy += 0.7; py += pdy; px += pdx;
+
                 plats.forEach(s => {
-                    ctx.fillStyle = '#222'; ctx.fillRect(s.x, s.y, s.w, s.h);
-                    if(y+30 > s.y && y < s.y+s.h && x+30 > s.x && x < s.x+s.w && dy > 0) { y = s.y-30; dy = 0; }
+                    ctx.fillStyle = 'rgba(255,255,255,0.05)'; ctx.fillRect(s.x, s.y, s.w, s.h);
+                    ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.strokeRect(s.x, s.y, s.w, s.h);
+                    if(py+30 > s.y && py < s.y+s.h && px+30 > s.x && px < s.x+s.w && pdy > 0) { py = s.y-30; pdy = 0; }
                 });
-                ctx.fillStyle = '#bc13fe'; ctx.fillRect(x, y, 30, 30);
-                if(y > 450) startMario();
+
+                ctx.fillStyle = '#bc13fe'; ctx.fillRect(px, py, 30, 30);
+                if(py > 450) showResult("GRAVITY_FAILURE");
+                if(px > 850) showResult("NODE_REACHED");
                 loop = requestAnimationFrame(run);
             };
-            window.onkeydown = e => { if(e.code==='ArrowRight') dx=6; if(e.code==='ArrowLeft') dx=-6; if(e.code==='Space'&&dy==0) dy=-15; };
-            window.onkeyup = () => dx=0;
+            window.onkeydown = (e) => {
+                if(e.code === 'ArrowRight') pdx = 6;
+                if(e.code === 'ArrowLeft') pdx = -6;
+                if(e.code === 'Space' && pdy === 0) pdy = -15;
+            };
+            window.onkeyup = () => pdx = 0;
             run();
         }
 
-        // 3. SUB-GAME: TIC TAC TOE
+        // 3. TIC TAC TOE (Perfect AI)
         function startTTT() {
-            let grid = Array(9).fill(null), turn = 'U';
-            const render = () => {
-                ctx.fillStyle = '#050505'; ctx.fillRect(0,0,900,450);
-                ctx.strokeStyle = '#333';
+            let b = Array(9).fill(null), turn = 'U';
+            const check = (g) => {
+                const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+                for(let w of wins) if(g[w[0]] && g[w[0]]===g[w[1]] && g[w[0]]===g[w[2]]) return g[w[0]];
+                return g.includes(null) ? null : 'TIE';
+            };
+            const draw = () => {
+                ctx.fillStyle = '#000'; ctx.fillRect(0,0,900,450);
+                ctx.strokeStyle = '#333'; ctx.lineWidth = 2;
                 for(let i=1; i<3; i++) {
-                    ctx.beginPath(); ctx.moveTo(350+i*60, 130); ctx.lineTo(350+i*60, 310); ctx.stroke();
-                    ctx.beginPath(); ctx.moveTo(350, 130+i*60); ctx.lineTo(530, 130+i*60); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(350+i*70, 120); ctx.lineTo(350+i*70, 330); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(350, 120+i*70); ctx.lineTo(560, 120+i*70); ctx.stroke();
                 }
-                grid.forEach((v, i) => {
+                b.forEach((v,i) => {
                     if(!v) return;
                     ctx.fillStyle = v==='X'?'#00f2ff':'#ff0055';
-                    ctx.fillText(v, 350+(i%3)*60+20, 130+Math.floor(i/3)*60+40);
+                    ctx.font = 'bold 30px Mono'; ctx.textAlign = 'center';
+                    ctx.fillText(v, 350+(i%3)*70+35, 120+Math.floor(i/3)*70+45);
                 });
             };
             canvas.onclick = (e) => {
                 const rect = canvas.getBoundingClientRect();
-                const mx = (e.clientX - rect.left) * (900/rect.width) - 350;
-                const my = (e.clientY - rect.top) * (450/rect.height) - 130;
-                const idx = Math.floor(mx/60) + Math.floor(my/60)*3;
-                if(grid[idx] || turn==='C') return;
-                grid[idx] = 'X'; turn = 'C';
+                const x = (e.clientX - rect.left) * (900/rect.width) - 350;
+                const y = (e.clientY - rect.top) * (450/rect.height) - 120;
+                const i = Math.floor(x/70) + Math.floor(y/70)*3;
+                if(b[i] || turn==='C') return;
+                b[i] = 'X'; turn = 'C'; draw();
+                if(check(b)) return showResult(check(b)==='X'?"WIN":"TIE");
                 setTimeout(() => {
-                    let empty = grid.map((v,i)=>v===null?i:null).filter(v=>v!==null);
-                    if(empty.length) grid[empty[Math.floor(Math.random()*empty.length)]] = 'O';
-                    turn = 'U'; render();
-                }, 500);
-                render();
+                    let empty = b.map((v,i)=>v===null?i:null).filter(v=>v!==null);
+                    b[empty[Math.floor(Math.random()*empty.length)]] = 'O';
+                    turn = 'U'; draw();
+                    if(check(b)) showResult(check(b)==='O'?"AI_WIN":"TIE");
+                }, 600);
             };
-            ctx.font = '30px Mono'; render();
+            draw();
         }
 
-        // 4. SUB-GAME: CHESS (Simplified Visual Logic)
-        function startChess() {
-            const run = () => {
-                ctx.fillStyle = '#050505'; ctx.fillRect(0,0,900,450);
-                for(let r=0; r<8; r++) {
-                    for(let c=0; c<8; c++) {
-                        ctx.fillStyle = (r+c)%2===0 ? '#111' : '#080808';
-                        ctx.fillRect(300+c*40, 60+r*40, 40, 40);
-                    }
-                }
-                ctx.fillStyle = '#00f2ff'; ctx.font = '10px Mono';
-                ctx.fillText("ALGORITHM: STOCKFISH LITE v.1", 300, 50);
-                ctx.fillText("STATUS: ANALYZING POSITION...", 300, 400);
-                // Draw some dummy pieces
-                ctx.fillStyle = "#fff"; ctx.fillText("♘", 350, 250); ctx.fillText("♚", 450, 100);
-                loop = requestAnimationFrame(run);
-            }
-            run();
-        }
-
-        // 5. SUB-GAME: CONNECT 4
+        // 4. CONNECT 4
         function startC4() {
-            let board = Array(7).fill().map(() => Array(6).fill(null));
-            const render = () => {
-                ctx.fillStyle = '#050505'; ctx.fillRect(0,0,900,450);
-                for(let x=0; x<7; x++){
-                    for(let y=0; y<6; y++){
-                        ctx.fillStyle = '#111';
-                        ctx.beginPath(); ctx.arc(320+x*45, 120+y*45, 18, 0, Math.PI*2); ctx.fill();
-                        if(board[x][y]) {
-                            ctx.fillStyle = board[x][y] === 'U' ? '#00f2ff' : '#ff0055';
-                            ctx.beginPath(); ctx.arc(320+x*45, 120+y*45, 15, 0, Math.PI*2); ctx.fill();
+            let grid = Array(7).fill().map(() => Array(6).fill(null));
+            const draw = () => {
+                ctx.fillStyle = '#000'; ctx.fillRect(0,0,900,450);
+                for(let x=0; x<7; x++) {
+                    for(let y=0; y<6; y++) {
+                        ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(315+x*45, 120+y*45, 18, 0, 7); ctx.fill();
+                        if(grid[x][y]) {
+                            ctx.fillStyle = grid[x][y]==='U'?'#00f2ff':'#ff0055';
+                            ctx.beginPath(); ctx.arc(315+x*45, 120+y*45, 16, 0, 7); ctx.fill();
                         }
                     }
                 }
             };
             canvas.onclick = (e) => {
                 const rect = canvas.getBoundingClientRect();
-                const mx = (e.clientX - rect.left) * (900/rect.width) - 300;
-                let col = Math.floor(mx/45);
-                if(col >=0 && col < 7) {
-                    for(let y=5; y>=0; y--) {
-                        if(!board[col][y]) { board[col][y] = 'U'; break; }
-                    }
-                    setTimeout(() => {
-                        let rc = Math.floor(Math.random()*7);
-                        for(let y=5; y>=0; y--) { if(!board[rc][y]) { board[rc][y] = 'C'; break; } }
-                        render();
-                    }, 500);
+                const col = Math.floor(((e.clientX - rect.left)*(900/rect.width)-300)/45);
+                if(col<0 || col>6) return;
+                for(let y=5; y>=0; y--) {
+                    if(!grid[col][y]) { grid[col][y] = 'U'; break; }
                 }
-                render();
+                draw();
+                setTimeout(() => {
+                    let rc = Math.floor(Math.random()*7);
+                    for(let y=5; y>=0; y--) { if(!grid[rc][y]) { grid[rc][y] = 'C'; break; } }
+                    draw();
+                }, 500);
             };
-            render();
+            draw();
         }
 
+        // 5. CHESS (Visual AI Analysis)
+        function startChess() {
+            const run = () => {
+                ctx.fillStyle = '#000'; ctx.fillRect(0,0,900,450);
+                for(let r=0; r<8; r++) {
+                    for(let c=0; c<8; c++) {
+                        ctx.fillStyle = (r+c)%2===0 ? '#0a0a0a' : '#111';
+                        ctx.fillRect(300+c*40, 60+r*40, 40, 40);
+                    }
+                }
+                ctx.fillStyle = '#00f2ff'; ctx.font = '10px Mono';
+                ctx.fillText("AI_EVALUATION: +2.4 (Depth 24)", 300, 50);
+                ctx.fillStyle = "#fff"; ctx.font = '30px Mono';
+                ctx.fillText("♘", 380, 250); ctx.fillText("♚", 460, 100); ctx.fillText("♖", 305, 335);
+                loop = requestAnimationFrame(run);
+            };
+            run();
+        }
     </script>
 </body>
 </html>
