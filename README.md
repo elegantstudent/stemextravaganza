@@ -10,6 +10,8 @@ This repository contains the source code for a single-page web application (SPA)
 
 The application features a custom UI, dynamic state-based routing, and three fully playable minigames built entirely from scratch using the **HTML5 Canvas API** and **Vanilla JavaScript**.
 
+Note: This codebase was generated utilizing AI assistance. My role focused on prompt engineering, architectural design, debugging, and deployment.
+
 ## ✨ Core Features
 * **Algorithmic Matchmaking:** A dynamic quiz that routes users to specific games based on their input parameters (APM/Reflex vs. Logic/Strategy).
 * **Zero Dependencies:** Built entirely without external frameworks or libraries to demonstrate strong fundamental knowledge of DOM manipulation, the Canvas API, and JavaScript game loops.
@@ -34,4 +36,4 @@ Because this project uses vanilla web technologies without a build step, running
 3. Alternatively, view the live production build via GitHub Pages [here](https://YOUR-GITHUB-USERNAME.github.io/YOUR-REPO-NAME/).
 
 ---
-*Developed by the [Your High School Name] AI Club.*
+*Developed by the BASIS San Antonio Shavano AI Club.*
