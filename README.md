@@ -33,7 +33,7 @@ Note: This codebase was generated utilizing AI assistance. My role focused on pr
 Because this project uses vanilla web technologies without a build step, running it is incredibly simple:
 1. Clone this repository: `git clone https://github.com/YOUR-USERNAME/YOUR-REPO-NAME.git`
 2. Navigate to the directory and open `index.html` in any modern web browser.
-3. Alternatively, view the live production build via GitHub Pages [here](https://YOUR-GITHUB-USERNAME.github.io/YOUR-REPO-NAME/).
+3. Alternatively, view the live production build via GitHub Pages [here](https://elegantstudent.github.io/stemextravaganza/).
 
 ---
 *Developed by the BASIS San Antonio Shavano AI Club.*
