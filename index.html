@@ -320,10 +320,9 @@
             if (typeIndex < welcomeText.length) {
                 typeTarget.innerHTML = welcomeText.substring(0, typeIndex + 1) + '<span class="cursor"></span>';
                 typeIndex++;
-                setTimeout(typeWriter, Math.random() * 50 + 50); // random typing speed
+                setTimeout(typeWriter, Math.random() * 50 + 50);
             }
         }
-        // Start typing on load
         window.onload = typeWriter;
 
 
@@ -332,7 +331,6 @@
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
             
-            // Clean up running games if leaving their view
             if(viewId !== 'game-snake') endSnake();
             if(viewId !== 'game-pong') endPong();
         }
@@ -470,18 +468,9 @@
             tttBoard.forEach((val, i) => { if (val === "") emptySpaces.push(i) });
             if (emptySpaces.length === 0) return;
 
-            // 1. Can AI win? Take the shot.
             choice = getWinningMove("O");
-
-            // 2. Can Player win? Block it (70% chance to be smart, 30% chance it misses it so user can win)
-            if (choice === null && Math.random() < 0.7) {
-                choice = getWinningMove("X");
-            }
-
-            // 3. Otherwise, random move
-            if (choice === null) {
-                choice = emptySpaces[Math.floor(Math.random() * emptySpaces.length)];
-            }
+            if (choice === null && Math.random() < 0.7) { choice = getWinningMove("X"); }
+            if (choice === null) { choice = emptySpaces[Math.floor(Math.random() * emptySpaces.length)]; }
 
             tttBoard[choice] = "O";
             let cell = document.getElementById('ttt-board').children[choice];
@@ -495,15 +484,8 @@
             tttActive = true;
         }
 
-        function checkTTTWin(player) {
-            return winCombos.some(combo => combo.every(idx => tttBoard[idx] === player));
-        }
-
-        function endGame(msg) {
-            document.getElementById('ttt-status').innerText = msg;
-            tttActive = false;
-        }
-
+        function checkTTTWin(player) { return winCombos.some(combo => combo.every(idx => tttBoard[idx] === player)); }
+        function endGame(msg) { document.getElementById('ttt-status').innerText = msg; tttActive = false; }
 
         // --- GAME 2: NEON PONG ---
         let pongCanvas, pCtx, pongLoop;
@@ -523,7 +505,7 @@
             document.addEventListener("keyup", pongKeyUp);
             
             clearInterval(pongLoop);
-            pongLoop = setInterval(updatePong, 1000/60); // 60fps
+            pongLoop = setInterval(updatePong, 1000/60);
             updatePongScore();
         }
 
@@ -550,49 +532,38 @@
         }
 
         function updatePong() {
-            // Player move
             if(upPressed && paddle1Y > 0) paddle1Y -= 5;
             if(downPressed && paddle1Y < pongCanvas.height - paddleH) paddle1Y += 5;
 
-            // AI Move (Simple tracking)
             let aiSpeed = 3.5;
             if(paddle2Y + paddleH/2 < ballY - 10) paddle2Y += aiSpeed;
             if(paddle2Y + paddleH/2 > ballY + 10) paddle2Y -= aiSpeed;
 
-            // Move Ball
             ballX += ballDx; ballY += ballDy;
 
-            // Wall bounce (Top/Bottom)
             if(ballY <= 0 || ballY >= pongCanvas.height) ballDy *= -1;
 
-            // Paddle 1 (User) bounce
             if(ballX <= paddleW && ballY > paddle1Y && ballY < paddle1Y + paddleH) {
-                ballDx *= -1.05; // speed up slightly
-                ballDy = ((ballY - (paddle1Y + paddleH/2)) / (paddleH/2)) * 4; // angle based on hit location
+                ballDx *= -1.05; 
+                ballDy = ((ballY - (paddle1Y + paddleH/2)) / (paddleH/2)) * 4; 
             }
-            
-            // Paddle 2 (AI) bounce
             if(ballX >= pongCanvas.width - paddleW && ballY > paddle2Y && ballY < paddle2Y + paddleH) {
                 ballDx *= -1.05;
                 ballDy = ((ballY - (paddle2Y + paddleH/2)) / (paddleH/2)) * 4;
             }
 
-            // Scoring
             if(ballX < 0) { p2Score++; resetPongBall(); updatePongScore(); }
             if(ballX > pongCanvas.width) { p1Score++; resetPongBall(); updatePongScore(); }
 
             drawPong();
         }
 
-        function updatePongScore() {
-            document.getElementById('pong-score').innerText = `User: ${p1Score} | CPU: ${p2Score}`;
-        }
+        function updatePongScore() { document.getElementById('pong-score').innerText = `User: ${p1Score} | CPU: ${p2Score}`; }
 
         function drawPong() {
             pCtx.fillStyle = "black";
             pCtx.fillRect(0, 0, pongCanvas.width, pongCanvas.height);
 
-            // Center dash line
             pCtx.setLineDash([5, 15]);
             pCtx.beginPath();
             pCtx.moveTo(250, 0);
@@ -600,29 +571,31 @@
             pCtx.strokeStyle = "rgba(0, 255, 204, 0.3)";
             pCtx.stroke();
 
-            // Glow effect
             pCtx.shadowBlur = 10;
-            pCtx.shadowColor = "var(--primary)";
+            pCtx.shadowColor = "#00ffcc";
 
-            pCtx.fillStyle = "var(--primary)";
-            pCtx.fillRect(0, paddle1Y, paddleW, paddleH); // User
+            pCtx.fillStyle = "#00ffcc";
+            pCtx.fillRect(0, paddle1Y, paddleW, paddleH); 
             
-            pCtx.fillStyle = "var(--accent)";
-            pCtx.shadowColor = "var(--accent)";
-            pCtx.fillRect(pongCanvas.width - paddleW, paddle2Y, paddleW, paddleH); // AI
+            pCtx.fillStyle = "#ff0055";
+            pCtx.shadowColor = "#ff0055";
+            pCtx.fillRect(pongCanvas.width - paddleW, paddle2Y, paddleW, paddleH); 
 
             pCtx.fillStyle = "white";
             pCtx.shadowColor = "white";
-            pCtx.fillRect(ballX - ballSize/2, ballY - ballSize/2, ballSize, ballSize); // Ball
+            pCtx.fillRect(ballX - ballSize/2, ballY - ballSize/2, ballSize, ballSize); 
             
-            pCtx.shadowBlur = 0; // reset
+            pCtx.shadowBlur = 0; 
         }
 
-
-        // --- GAME 3: NEON SNAKE WITH COUNTDOWN ---
+        // --- GAME 3: NEON SNAKE WITH HACKER COUNTDOWN ---
         let sCanvas, sCtx;
         let snake, food, dx, dy, snakeScore, snakeGameLoop, countdownTimer;
         const GRID = 20;
+        
+        // Hardcoded Hex Colors for Canvas API reliability
+        const COLOR_SNAKE = "#00ffcc";
+        const COLOR_FOOD = "#ff0055";
 
         function initSnake() {
             sCanvas = document.getElementById('snake-canvas');
@@ -635,33 +608,48 @@
             clearInterval(countdownTimer);
             document.removeEventListener("keydown", changeDirection);
 
-            let count = 3;
-            document.getElementById('snake-score').innerText = `Init in... ${count}`;
+            let hackPhase = 0;
+            let finalCount = 3;
+            document.getElementById('snake-score').innerText = `> EXECUTING PROTOCOL...`;
             
-            // Draw initial background
-            sCtx.fillStyle = "black";
-            sCtx.fillRect(0, 0, sCanvas.width, sCanvas.height);
+            const bootLines = [
+                "> SYSTEM BREACH DETECTED...",
+                "> COMPILING SERPENT_PROTOCOL.exe",
+                "> OVERRIDING FIREWALL... [SUCCESS]",
+                "> FORCED EXECUTION IN: "
+            ];
 
             countdownTimer = setInterval(() => {
                 sCtx.fillStyle = "black";
                 sCtx.fillRect(0, 0, sCanvas.width, sCanvas.height);
                 
-                sCtx.fillStyle = "var(--primary)";
-                sCtx.font = "bold 60px Courier New";
-                sCtx.textAlign = "center";
+                sCtx.fillStyle = COLOR_SNAKE;
+                sCtx.font = "bold 16px Courier New";
+                sCtx.textAlign = "left";
                 
-                if (count > 0) {
-                    sCtx.fillText(count, sCanvas.width/2, sCanvas.height/2 + 20);
-                    document.getElementById('snake-score').innerText = `Init in... ${count}`;
-                    count--;
-                } else {
-                    clearInterval(countdownTimer);
-                    document.getElementById('snake-score').innerText = `Score: 0`;
-                    genFood();
-                    document.addEventListener("keydown", changeDirection);
-                    snakeGameLoop = setInterval(updateSnake, 100);
+                // Draw all lines up to current phase
+                for(let i = 0; i <= hackPhase; i++) {
+                    if (i < bootLines.length - 1) {
+                        sCtx.fillText(bootLines[i], 20, 40 + (i * 30));
+                    } else if (i === bootLines.length - 1) {
+                        sCtx.fillText(bootLines[i] + finalCount, 20, 40 + (i * 30));
+                    }
                 }
-            }, 1000);
+
+                if (hackPhase < bootLines.length - 1) {
+                    hackPhase++;
+                } else {
+                    if (finalCount > 1) {
+                        finalCount--;
+                    } else {
+                        clearInterval(countdownTimer);
+                        document.getElementById('snake-score').innerText = `Score: 0`;
+                        genFood();
+                        document.addEventListener("keydown", changeDirection);
+                        snakeGameLoop = setInterval(updateSnake, 100);
+                    }
+                }
+            }, 700);
         }
 
         function endSnake() {
@@ -673,7 +661,6 @@
         function updateSnake() {
             const head = {x: snake[0].x + dx, y: snake[0].y + dy};
             
-            // Wall Collision
             if (head.x < 0 || head.x >= sCanvas.width || head.y < 0 || head.y >= sCanvas.height || hasEatenSelf(head)) {
                 endSnake();
                 document.getElementById('snake-score').innerText = `SYSTEM FAILURE. Final Score: ${snakeScore}.`;
@@ -703,17 +690,20 @@
             sCtx.fillStyle = "black";
             sCtx.fillRect(0, 0, sCanvas.width, sCanvas.height);
 
-            sCtx.shadowBlur = 10;
-            sCtx.shadowColor = "var(--accent)";
-            sCtx.fillStyle = "var(--accent)"; 
+            // Draw Food (Apple)
+            sCtx.shadowBlur = 15;
+            sCtx.shadowColor = COLOR_FOOD;
+            sCtx.fillStyle = COLOR_FOOD; 
             sCtx.fillRect(food.x, food.y, GRID - 2, GRID - 2);
 
-            sCtx.shadowColor = "var(--primary)";
+            // Draw Snake
+            sCtx.shadowColor = COLOR_SNAKE;
             snake.forEach((part, index) => {
-                sCtx.fillStyle = index === 0 ? "#fff" : "var(--primary)";
+                sCtx.fillStyle = index === 0 ? "#ffffff" : COLOR_SNAKE;
                 sCtx.fillRect(part.x, part.y, GRID - 2, GRID - 2);
             });
-            sCtx.shadowBlur = 0;
+            
+            sCtx.shadowBlur = 0; // Reset shadow so it doesn't bleed everywhere
         }
 
         function genFood() {
